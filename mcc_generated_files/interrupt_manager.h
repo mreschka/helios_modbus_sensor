@@ -82,7 +82,7 @@
  * @Example
     INTERRUPT_InterruptManager();
  */
-void __interrupt() INTERRUPT_InterruptManager(void);
+void interrupt INTERRUPT_InterruptManager(void);
 
 /**
  * @Param
