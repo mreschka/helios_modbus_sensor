@@ -45,14 +45,9 @@
 #include "i2c_handler.h"
 #include "uart_handler.h"
 
-/*
-                         Main application
- */
-
-
 void checkCmd()
 {
-    
+
     uint8_t cmd = getCmdByte();
     switch (cmd)
     {
@@ -67,10 +62,14 @@ void checkCmd()
             break;
         default:
             break;
-            
+
     }
-    
+
 }
+
+/*
+                         Main application
+ */
 void main(void)
 {
     // initialize the device

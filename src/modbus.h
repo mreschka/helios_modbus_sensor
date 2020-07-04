@@ -24,20 +24,20 @@ extern "C" {
 #endif
 #include <stdint.h>
 #include <stdbool.h>
-    
+
 #define MODBUS_MAX_FRAMELENGTH (64u)
 
 #define MODBUS_FRAME_TIMEOUT   (1100000ul)
-    
+
 #define MAX_TEMP_SENSCOUNT (8u)
-#define TEMP_MASK  (0xffu)
-    
-#define MAX_VOC_SENSCOUNT (4u)
-#define VOC_MASK  (0x0fu)
-    
-#define MAX_CO2_SENSCOUNT (4u)
-#define CO2_MASK   (0x0fu)
-    
+#define TEMP_MASK  ((1u<<MAX_TEMP_SENSCOUNT) - 1u)
+
+#define MAX_VOC_SENSCOUNT (8u)
+#define VOC_MASK  ((1u<<MAX_VOC_SENSCOUNT) - 1u)
+
+#define MAX_CO2_SENSCOUNT (10u - MAX_VOC_SENSCOUNT)
+#define CO2_MASK   ((1u<<MAX_CO2_SENSCOUNT) - 1u)
+
 #define NUM_SENSORS (MAX_TEMP_SENSCOUNT + MAX_VOC_SENSCOUNT + MAX_CO2_SENSCOUNT)
 
 void modbus_init();

@@ -227,7 +227,7 @@ uint8_t addr2index(uint8_t addr)
 {
     uint8_t index = (addr & 0x0fu) -1u;
     uint8_t type = ((addr & 0xf0u) >> 4) -3u;
-    if ((addr > 0x30) && (addr < 0x58))
+    if ((addr > 0x30) && (addr < 0x59))
     {
         switch (type)
         {

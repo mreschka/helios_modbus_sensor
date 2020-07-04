@@ -32,26 +32,27 @@ typedef enum
 } I2C_STATUS;
 
 
-uint8_t EEPROM_Buffer[] =
+uint8_t EEPROM_Buffer[] =  //Actually online memory-Buffer, not EEPROM. Maybe coming in the future...
 {
-    0x7f,                                    // active Temp/Humidty sensors
-    0x0f,                                    // active VOC Sensors
-    0x0f,                                    // active C=2 Sensors
-    0x00,                                    // cmd byte
-    0x32,0x32,0x32,0x32,0x32,0x32,0x32,0x32, // Humidity 1 .. 8 (initial 50%)
-    0x64,0x64,0x64,0x64,0x64,0x64,0x64,0x64, // Temperatur 1 ..8 (initial 20.0°C) 
-    0x03,0x23, 0x03,0x24, 0x03,0x25, 0x03,0x26,                     // VOC 1..4
-    0x03,0x10, 0x03,0x11, 0x03,0x12, 0x03,0x13                      // CO2 1..4
+    0x00,                                    // active Temp/Humidity sensors (default: all off)
+    0x00,                                    // active VOC Sensors (default: all off)
+    0x00,                                    // active CO2 Sensors (default: all off)
+    0x00,                                    // CMD byte
+    0x2D,0x2D,0x2D,0x2D,0x2D,0x2D,0x2D,0x2D, // Humidity 1 .. 8 (initial 45%)
+    0x64,0x65,0x66,0x67,0x68,0x69,0x6A,0x6B, // Temperature 1 ..8 (initial 20.x°C) 
+    0x01,0xC2, 0x01,0xC3, 0x01,0xC4, 0x01,0xC5,     // VOC 1..4 (initial 45x PPM)
+    0x01,0xC6, 0x01,0xC7, 0x01,0xC8, 0x01,0xC9,     // VOC 5..8 (initial 45x PPM)
+    0x03,0x10, 0x03,0x11, 0x03,0x12, 0x03,0x13      // CO2 1..4
 };
 
 uint8_t eepromAddress    = 0;
 
 #define EEPROM_DATASTART (4u)
-#define EEPROM_NUM_FTF   (8u)
+#define EEPROM_NUM_FTF   MAX_TEMP_SENSCOUNT
 #define EEPROM_SIZE_FTF  (1u)
-#define EEPROM_NUM_VOC   (4u)
+#define EEPROM_NUM_VOC   MAX_VOC_SENSCOUNT
 #define EEPROM_SIZE_VOC  (2u)
-#define EERROM_NUM_CO2   (4u)
+#define EERROM_NUM_CO2   MAX_CO2_SENSCOUNT
 #define EEPROM_SIZE_CO2  (2u)
 
 void I2C1_ISR ( void )
@@ -151,7 +152,7 @@ uint8_t getHumidity(uint8_t index)
         I2C1_waitIdle();
         INTERRUPT_GlobalInterruptDisable();
         uint8_t ivalue = EEPROM_Buffer[(index * EEPROM_SIZE_FTF) + EEPROM_DATASTART ];
-        INTERRUPT_GlobalInterruptEnable();        
+        INTERRUPT_GlobalInterruptEnable();
         return ivalue;
     }
     else
@@ -169,7 +170,7 @@ float getTemperature(uint8_t index)
         I2C1_waitIdle();
         INTERRUPT_GlobalInterruptDisable();
         uint8_t ivalue = EEPROM_Buffer[(index * EEPROM_SIZE_FTF) + EEPROM_DATASTART + (EEPROM_NUM_FTF * EEPROM_SIZE_FTF)];
-        INTERRUPT_GlobalInterruptEnable();        
+        INTERRUPT_GlobalInterruptEnable();
         float value = (float)(ivalue);
         value = value / 10.0f;
         value = value + 13.0f; //(3° Offset Helios!!)
@@ -185,12 +186,12 @@ uint16_t getVOC(uint8_t index)
 {
     if (index < EEPROM_NUM_VOC)
     {
-        uint8_t pos = (index * EEPROM_SIZE_VOC)+ EEPROM_DATASTART + ((EEPROM_NUM_FTF * EEPROM_SIZE_FTF)*2u);
+        uint8_t pos = (index * EEPROM_SIZE_VOC) + EEPROM_DATASTART + ((EEPROM_NUM_FTF * EEPROM_SIZE_FTF)*2u);
         I2C1_waitIdle();
         INTERRUPT_GlobalInterruptDisable();
         uint16_t ivalue = (uint16_t)(EEPROM_Buffer[pos] << 8u);
         ivalue |= EEPROM_Buffer[pos +1u];
-        INTERRUPT_GlobalInterruptEnable();   
+        INTERRUPT_GlobalInterruptEnable();
         return ivalue;
     }
     else
@@ -200,14 +201,14 @@ uint16_t getVOC(uint8_t index)
 }
 uint16_t getCO2(uint8_t index)
 {
-    if (index < 4)
+    if (index < EERROM_NUM_CO2)
     {
-        uint8_t pos = (index * EEPROM_SIZE_CO2)+ EEPROM_DATASTART + ((EEPROM_NUM_FTF * EEPROM_SIZE_FTF)*2u) + (EEPROM_NUM_VOC * EEPROM_SIZE_VOC);
+        uint8_t pos = (index * EEPROM_SIZE_CO2) + EEPROM_DATASTART + ((EEPROM_NUM_FTF * EEPROM_SIZE_FTF)*2u) + (EEPROM_NUM_VOC * EEPROM_SIZE_VOC);
         I2C1_waitIdle();
         INTERRUPT_GlobalInterruptDisable();
         uint16_t ivalue = (uint16_t)(EEPROM_Buffer[pos] << 8u);
         ivalue |= EEPROM_Buffer[pos +1u];
-        INTERRUPT_GlobalInterruptEnable();        
+        INTERRUPT_GlobalInterruptEnable();
         return ivalue;
     }
     else

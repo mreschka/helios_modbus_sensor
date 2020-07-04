@@ -28,8 +28,8 @@
 
 #ifdef	__cplusplus
 extern "C" {
-#endif 
-    
+#endif
+
 void I2C1_ISR ( void );
 float getTemperature(uint8_t index);
 uint8_t getHumidity(uint8_t index);
